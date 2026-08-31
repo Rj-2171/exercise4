@@ -506,23 +506,74 @@ function projectPoly(imagedata,poly,view) {
 
 function main() {
 
-    // Get the canvas, context, and image data
-    var canvas = document.getElementById("viewport"); 
+    var canvas = document.getElementById("viewport");
     var context = canvas.getContext("2d");
-    var w = context.canvas.width; // as set in html
-    var h = context.canvas.height;  // as set in html
-    var imagedata = context.createImageData(w,h);
-    
-    // define polygon and view
-    var testEye = new Vector(0,0,0);
-    var testAt = Vector.subtract(new Vector(0,0,10),testEye);
-    var view = {eye:testEye, at:testAt, up:new Vector(0,1,0)};
-    var poly = [{x:-5,y:5,z:10,c:new Color(255,0,0,255)}, {x:5,y:5,z:10,c:new Color(0,255,0,255)}, 
-                {x:5,y:-5,z:10,c:new Color(0,0,0,255)}, {x:-5,y:-5,z:10,c:new Color(0,0,255,255)}];
-    
-    // Define and render a rectangle in 2D with colors and coords at corners
-    projectPoly(imagedata,poly,view);
-    fillPoly(imagedata,poly);
-    
-    context.putImageData(imagedata, 0, 0); // display the image in the context
+
+    var w = canvas.width;
+    var h = canvas.height;
+
+    // Each image gets half of the canvas
+    var sectionW = Math.floor(w / 2);
+
+    // Softer/lighter versions of the original colors
+    var lightRed   = new Color(255, 110, 110, 255);
+    var lightGreen = new Color(110, 255, 110, 255);
+    var lightBlue  = new Color(110, 140, 255, 255);
+    var lightDark  = new Color(90, 90, 110, 255);
+
+    // Creates a fresh polygon for each view
+    function makePoly() {
+        return [
+            {x:-5, y: 5, z:10, c:lightRed.clone()},
+            {x: 5, y: 5, z:10, c:lightGreen.clone()},
+            {x: 5, y:-5, z:10, c:lightDark.clone()},
+            {x:-5, y:-5, z:10, c:lightBlue.clone()}
+        ];
+    }
+
+
+    // =====================================================
+    // VIEW 1: Rotated / Diamond
+    // =====================================================
+
+    var image1 = context.createImageData(sectionW, h);
+
+    var eye1 = new Vector(0,0,0);
+    var at1 = Vector.subtract(new Vector(0,0,10), eye1);
+
+    var view1 = {
+        eye: eye1,
+        at: at1,
+        up: new Vector(1,1,0)
+    };
+
+    var poly1 = makePoly();
+
+    projectPoly(image1, poly1, view1);
+    fillPoly(image1, poly1);
+
+    context.putImageData(image1, 0, 0);
+
+
+    // =====================================================
+    // VIEW 2: Perspective / Angled
+    // =====================================================
+
+    var image2 = context.createImageData(sectionW, h);
+
+    var eye2 = new Vector(7,2,0);
+    var at2 = Vector.subtract(new Vector(0,0,10), eye2);
+
+    var view2 = {
+        eye: eye2,
+        at: at2,
+        up: new Vector(0,1,0)
+    };
+
+    var poly2 = makePoly();
+
+    projectPoly(image2, poly2, view2);
+    fillPoly(image2, poly2);
+
+    context.putImageData(image2, sectionW, 0);
 }
